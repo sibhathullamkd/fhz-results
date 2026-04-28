@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FHZ Students Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a26;
+    --border: rgba(255,255,255,0.07); --text: #f0f0f8; --muted: #7070a0;
+    --accent: #e8c86a; --red: #e85a5a; --green: #5ae8a0;
+    --t1: #e85a8a; --t2: #5ae8c8; --t3: #e8a85a; --t4: #8a5ae8;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+  .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+  .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem; width: 100%; max-width: 400px; text-align: center; }
+  .login-card .logo-mark { width: 56px; height: 56px; background: var(--t4); border-radius: 14px; display: grid; place-items: center; font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; color: #fff; margin: 0 auto 1.5rem; }
+  .login-card h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .login-card p { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
+
+  .field { margin-bottom: 1.25rem; text-align: left; }
+  .field label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+  .field input, .field select, .field textarea { width: 100%; padding: 0.75rem 1rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .field select option { background: #1a1a26; }
+
+  .btn { padding: 0.8rem 1.5rem; background: var(--accent); border: none; border-radius: 10px; color: #0a0a0f; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+  .btn:hover { opacity: 0.85; }
+  .btn.full { width: 100%; }
+  .btn.danger { background: var(--red); color: #fff; }
+  .btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn.sm { padding: 0.4rem 0.85rem; font-size: 0.78rem; }
+
+  .error-msg { color: var(--red); font-size: 0.8rem; margin-top: 0.75rem; }
+  .msg-bar { padding: 0.75rem 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.85rem; display: none; }
+  .msg-bar.success { background: rgba(90,232,160,0.1); border: 1px solid rgba(90,232,160,0.25); color: var(--green); display: block; }
+  .msg-bar.error { background: rgba(232,90,90,0.1); border: 1px solid rgba(232,90,90,0.25); color: var(--red); display: block; }
+
+  #admin-ui { display: none; }
+
+  .admin-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+  .admin-header .logo { display: flex; align-items: center; gap: 0.75rem; }
+  .logo-mark-s { width: 36px; height: 36px; background: var(--t4); border-radius: 8px; display: grid; place-items: center; font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 900; color: #fff; }
+  .admin-title { font-weight: 600; font-size: 0.95rem; }
+  .admin-sub { font-size: 0.7rem; color: var(--muted); }
+  .logout-btn { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem 0.9rem; color: var(--muted); cursor: pointer; font-size: 0.8rem; }
+  .logout-btn:hover { color: var(--text); }
+
+  /* TABS */
+  .tab-bar { display: flex; gap: 0.5rem; padding: 1.5rem 2rem 0; border-bottom: 1px solid var(--border); }
+  .tab-btn { padding: 0.6rem 1.25rem; border: none; background: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .tab-content { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+  .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+  .tab-pane.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; } }
+
+  .page-grid { display: grid; grid-template-columns: 360px 1fr; gap: 2rem; align-items: start; }
+  @media (max-width: 800px) { .page-grid { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; }
+  .panel-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+
+  /* SEARCH BAR */
+  .search-row { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; }
+  .search-row input { flex: 1; padding: 0.65rem 1rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; outline: none; }
+  .search-row input:focus { border-color: var(--accent); }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th { text-align: left; padding: 0.6rem 0.75rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 0.7rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .avatar-sm { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--t4)); display: grid; place-items: center; font-size: 0.75rem; font-weight: 700; color: #0a0a0f; flex-shrink: 0; }
+  .student-cell { display: flex; align-items: center; gap: 0.6rem; }
+  .chest-tag { font-family: 'DM Mono', monospace; font-size: 0.75rem; background: var(--surface2); padding: 0.15rem 0.5rem; border-radius: 5px; }
+
+  .team-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.35rem; }
+
+  .score-cell { font-family: 'DM Mono', monospace; font-weight: 500; color: var(--accent); }
+  .empty-row td { text-align: center; color: var(--muted); padding: 3rem; }
+  .action-btns { display: flex; gap: 0.4rem; }
+
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(10,10,15,0.3); border-top-color: #0a0a0f; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* BULK IMPORT */
+  .import-area { background: var(--surface2); border: 2px dashed var(--border); border-radius: 12px; padding: 2rem; text-align: center; margin-bottom: 1.25rem; cursor: pointer; transition: border-color 0.2s; }
+  .import-area:hover { border-color: var(--accent); }
+  .import-area p { color: var(--muted); font-size: 0.85rem; margin-top: 0.5rem; }
+  .import-area .icon { font-size: 2rem; }
+  .import-area input[type="file"] { display: none; }
+
+  .csv-preview { background: var(--surface2); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; font-size: 0.78rem; color: var(--muted); font-family: 'DM Mono', monospace; max-height: 150px; overflow-y: auto; }
+
+  /* SCORE OVERVIEW */
+  .score-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+  .score-card-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+  .score-card-val { font-family: 'DM Mono', monospace; font-size: 1.8rem; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="logo-mark">S</div>
+    <h2>Students Admin</h2>
+    <p>FHZ Art Fest — Student Management Portal</p>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="login-pw" placeholder="Enter students admin password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn full" onclick="doLogin()">Sign In</button>
+    <div class="error-msg" id="login-err"></div>
+  </div>
+</div>
+
+<div id="admin-ui">
+  <div class="admin-header">
+    <div class="logo">
+      <div class="logo-mark-s">S</div>
+      <div>
+        <div class="admin-title">Students Admin</div>
+        <div class="admin-sub">FHZ Art Fest 2024</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center">
+      <a href="admin.html" style="color:var(--muted);font-size:0.8rem;text-decoration:none;">Results Admin →</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('students')">👤 Students</button>
+    <button class="tab-btn" onclick="switchTab('add')">➕ Add / Edit</button>
+    <button class="tab-btn" onclick="switchTab('import')">📥 Bulk Import</button>
+    <button class="tab-btn" onclick="switchTab('overview')">📊 Score Overview</button>
+  </div>
+
+  <div class="tab-content">
+
+    <!-- STUDENTS LIST -->
+    <div class="tab-pane active" id="tab-students">
+      <div class="search-row">
+        <input type="text" id="stu-search" placeholder="Search by name or chest number..." oninput="filterStudents()">
+        <button class="btn sm" onclick="switchTab('add');clearStudentForm()">+ Add</button>
+      </div>
+      <div class="panel" style="padding:0">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Chest #</th>
+                <th>Class</th>
+                <th>Team</th>
+                <th>Auto Score</th>
+                <th>Bonus</th>
+                <th>Total</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="students-tbody">
+              <tr class="empty-row"><td colspan="8">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD / EDIT -->
+    <div class="tab-pane" id="tab-add">
+      <div class="page-grid">
+        <div class="panel">
+          <div class="panel-title">
+            <span id="add-form-title">✦ Add Student</span>
+          </div>
+          <div class="msg-bar" id="stu-msg"></div>
+          <input type="hidden" id="stu-editing-id">
+
+          <div class="field"><label>Full Name *</label><input type="text" id="s-name" placeholder="Student full name"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div class="field"><label>Chest Number *</label><input type="text" id="s-chest" placeholder="e.g. 101"></div>
+            <div class="field"><label>Class</label><input type="text" id="s-class" placeholder="e.g. 10A"></div>
+          </div>
+          <div class="field"><label>Team</label>
+            <select id="s-team">
+              <option value="">— Select Team —</option>
+              <option value="1">Team Alpha</option>
+              <option value="2">Team Beta</option>
+              <option value="3">Team Gamma</option>
+              <option value="4">Team Delta</option>
+            </select>
+          </div>
+          <div class="field"><label>Bonus Points (manual)</label><input type="number" id="s-bonus" placeholder="0" min="0"></div>
+          <div class="field"><label>Notes</label><input type="text" id="s-notes" placeholder="Any extra info..."></div>
+
+          <div style="display:flex;gap:0.75rem;margin-top:0.5rem">
+            <button class="btn" onclick="submitStudent()" id="stu-submit-btn">Add Student</button>
+            <button class="btn secondary sm" onclick="clearStudentForm()">Clear</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Quick Reference</div>
+          <p style="color:var(--muted);font-size:0.85rem;line-height:1.8">
+            • <strong>Chest Number</strong> is the unique ID students use to search their profile.<br>
+            • <strong>Auto Score</strong> is calculated from results — 5pts for 1st, 3pts for 2nd, 1pt for 3rd.<br>
+            • <strong>Bonus Points</strong> are manually added on top of auto-calculated score.<br>
+            • <strong>Total Score</strong> = Auto Score + Bonus Points.<br><br>
+            After adding results in the Results Admin, student scores update automatically on the public page.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BULK IMPORT -->
+    <div class="tab-pane" id="tab-import">
+      <div class="page-grid">
+        <div class="panel">
+          <div class="panel-title">📥 CSV Import</div>
+          <div class="msg-bar" id="import-msg"></div>
+          <p style="color:var(--muted);font-size:0.82rem;margin-bottom:1.25rem;line-height:1.7">
+            Upload a CSV file with columns:<br>
+            <code style="background:var(--surface2);padding:0.2rem 0.4rem;border-radius:4px;font-size:0.78rem">name, chest_number, class, team_id, extra_score</code>
+          </p>
+          <label class="import-area" for="csv-file">
+            <div class="icon">📂</div>
+            <strong>Click to upload CSV</strong>
+            <p>or drag and drop</p>
+            <input type="file" id="csv-file" accept=".csv" onchange="readCSV(this)">
+          </label>
+          <div class="csv-preview" id="csv-preview" style="display:none"></div>
+          <button class="btn" id="import-btn" style="display:none" onclick="importCSV()">Import Students</button>
+        </div>
+        <div class="panel">
+          <div class="panel-title">CSV Format Example</div>
+          <pre style="background:var(--surface2);border-radius:10px;padding:1rem;font-size:0.78rem;color:var(--muted);overflow-x:auto;line-height:1.8">name,chest_number,class,team_id,extra_score
+Ahmed Ali,101,10A,1,0
+Fatima Zahra,102,9B,2,0
+Mohammed Salim,103,10B,1,5
+Aisha Noor,104,8A,3,0</pre>
+          <p style="color:var(--muted);font-size:0.78rem;margin-top:1rem">
+            • team_id: 1=Alpha, 2=Beta, 3=Gamma, 4=Delta<br>
+            • extra_score: bonus points (use 0 if none)<br>
+            • Duplicate chest numbers will be skipped
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCORE OVERVIEW -->
+    <div class="tab-pane" id="tab-overview">
+      <div class="score-cards" id="score-cards">
+        <div style="color:var(--muted);font-size:0.85rem">Loading...</div>
+      </div>
+      <div class="panel" style="padding:0">
+        <div style="padding:1.25rem 1.75rem;border-bottom:1px solid var(--border)">
+          <strong style="font-size:0.95rem">Student Score Leaderboard</strong>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Student</th><th>Chest</th><th>Team</th><th>Prizes</th><th>Total Score</th></tr>
+            </thead>
+            <tbody id="leaderboard-tbody">
+              <tr class="empty-row"><td colspan="6">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const TEAMS = {
+  1: { name: 'Alpha', color: 'var(--t1)' },
+  2: { name: 'Beta',  color: 'var(--t2)' },
+  3: { name: 'Gamma', color: 'var(--t3)' },
+  4: { name: 'Delta', color: 'var(--t4)' },
+};
+const PRIZE_SCORES = { '1st': 5, '2nd': 3, '3rd': 1 };
+
+let allStudents = [];
+let allResults = [];
+let csvData = [];
+
+// ── AUTH ─────────────────────────────────────────────────────────────────
+function doLogin() {
+  const pw = document.getElementById('login-pw').value;
+  if (pw === STUDENTS_ADMIN_PASSWORD) {
+    sessionStorage.setItem('fhz_stu_admin', '1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-ui').style.display = 'block';
+    loadData();
+  } else {
+    document.getElementById('login-err').textContent = 'Incorrect password.';
+  }
+}
+function logout() { sessionStorage.removeItem('fhz_stu_admin'); location.reload(); }
+if (sessionStorage.getItem('fhz_stu_admin')) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-ui').style.display = 'block';
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn')[['students','add','import','overview'].indexOf(name)].classList.add('active');
+  if (name === 'overview') renderOverview();
+}
+
+// ── DATA ─────────────────────────────────────────────────────────────────
+async function loadData() {
+  const [{ data: studs }, { data: results }] = await Promise.all([
+    sb.from('students').select('*').order('name'),
+    sb.from('results').select('*'),
+  ]);
+  allStudents = studs || [];
+  allResults  = results || [];
+  renderStudentsTable(allStudents);
+}
+
+function computeAutoScore(chestNum) {
+  let score = 0;
+  let prizes = [];
+  allResults.forEach(r => {
+    [['1st','first'],['2nd','second'],['3rd','third']].forEach(([place, key]) => {
+      const chests = (r[`${key}_chest_numbers`] || '').toString().split(',').map(s => s.trim());
+      if (chests.includes(String(chestNum))) {
+        score += PRIZE_SCORES[place];
+        prizes.push(place);
+      }
+    });
+  });
+  return { score, prizes };
+}
+
+// ── STUDENTS TABLE ────────────────────────────────────────────────────────
+function renderStudentsTable(list) {
+  const tbody = document.getElementById('students-tbody');
+  if (!list.length) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="8">No students yet. Add some!</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(s => {
+    const { score: autoScore } = computeAutoScore(s.chest_number);
+    const bonus = s.extra_score || 0;
+    const total = autoScore + bonus;
+    const team = TEAMS[s.team_id];
+    const init = (s.name || '?').charAt(0).toUpperCase();
+    return `<tr>
+      <td><div class="student-cell"><div class="avatar-sm">${init}</div><strong>${s.name}</strong></div></td>
+      <td><span class="chest-tag">${s.chest_number}</span></td>
+      <td>${s.class || '—'}</td>
+      <td>${team ? `<span class="team-dot" style="background:${team.color}"></span>${team.name}` : '—'}</td>
+      <td class="score-cell">${autoScore}</td>
+      <td style="color:var(--green)">+${bonus}</td>
+      <td class="score-cell" style="font-size:1rem">${total}</td>
+      <td><div class="action-btns">
+        <button class="btn secondary sm" onclick="editStudent('${s.id}')">Edit</button>
+        <button class="btn danger sm" onclick="deleteStudent('${s.id}')">Del</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterStudents() {
+  const q = document.getElementById('stu-search').value.toLowerCase();
+  const filtered = allStudents.filter(s =>
+    s.name?.toLowerCase().includes(q) || String(s.chest_number).includes(q)
+  );
+  renderStudentsTable(filtered);
+}
+
+// ── ADD / EDIT STUDENT ────────────────────────────────────────────────────
+function clearStudentForm() {
+  ['s-name','s-chest','s-class','s-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('s-team').selectedIndex = 0;
+  document.getElementById('s-bonus').value = '0';
+  document.getElementById('stu-editing-id').value = '';
+  document.getElementById('add-form-title').textContent = '✦ Add Student';
+  document.getElementById('stu-submit-btn').textContent = 'Add Student';
+  document.getElementById('stu-msg').className = 'msg-bar';
+}
+
+async function submitStudent() {
+  const name = document.getElementById('s-name').value.trim();
+  const chest = document.getElementById('s-chest').value.trim();
+  if (!name || !chest) { showStuMsg('Name and chest number are required.', 'error'); return; }
+
+  const data = {
+    name,
+    chest_number: chest,
+    class: document.getElementById('s-class').value.trim(),
+    team_id: parseInt(document.getElementById('s-team').value) || null,
+    extra_score: parseInt(document.getElementById('s-bonus').value) || 0,
+    notes: document.getElementById('s-notes').value.trim(),
+  };
+
+  const btn = document.getElementById('stu-submit-btn');
+  btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true;
+
+  const editId = document.getElementById('stu-editing-id').value;
+  let error;
+  if (editId) {
+    ({ error } = await sb.from('students').update(data).eq('id', editId));
+  } else {
+    ({ error } = await sb.from('students').insert(data));
+  }
+
+  btn.disabled = false;
+  btn.textContent = editId ? 'Update Student' : 'Add Student';
+
+  if (error) { showStuMsg('Error: ' + error.message, 'error'); return; }
+  showStuMsg(editId ? 'Student updated!' : 'Student added!', 'success');
+  clearStudentForm();
+  loadData();
+}
+
+async function editStudent(id) {
+  const s = allStudents.find(s => s.id === id);
+  if (!s) return;
+  document.getElementById('s-name').value = s.name || '';
+  document.getElementById('s-chest').value = s.chest_number || '';
+  document.getElementById('s-class').value = s.class || '';
+  document.getElementById('s-team').value = s.team_id || '';
+  document.getElementById('s-bonus').value = s.extra_score || 0;
+  document.getElementById('s-notes').value = s.notes || '';
+  document.getElementById('stu-editing-id').value = id;
+  document.getElementById('add-form-title').textContent = '✏️ Edit Student';
+  document.getElementById('stu-submit-btn').textContent = 'Update Student';
+  switchTab('add');
+}
+
+async function deleteStudent(id) {
+  if (!confirm('Delete this student? This cannot be undone.')) return;
+  await sb.from('students').delete().eq('id', id);
+  loadData();
+}
+
+function showStuMsg(text, type) {
+  const el = document.getElementById('stu-msg');
+  el.textContent = text; el.className = 'msg-bar ' + type;
+  setTimeout(() => { el.className = 'msg-bar'; }, 4000);
+}
+
+// ── CSV IMPORT ────────────────────────────────────────────────────────────
+function readCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.trim().split('\n');
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    csvData = lines.slice(1).map(line => {
+      const cols = line.split(',');
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = (cols[i] || '').trim(); });
+      return obj;
+    }).filter(r => r.name && r.chest_number);
+
+    const preview = document.getElementById('csv-preview');
+    preview.style.display = 'block';
+    preview.textContent = `Found ${csvData.length} students:\n` + csvData.slice(0, 5).map(r => `  ${r.name} — #${r.chest_number} — Team ${r.team_id || '?'}`).join('\n') + (csvData.length > 5 ? `\n  ... and ${csvData.length - 5} more` : '');
+    document.getElementById('import-btn').style.display = 'inline-block';
+  };
+  reader.readAsText(file);
+}
+
+async function importCSV() {
+  if (!csvData.length) return;
+  const btn = document.getElementById('import-btn');
+  btn.innerHTML = '<span class="spinner"></span> Importing...';
+  btn.disabled = true;
+
+  const rows = csvData.map(r => ({
+    name: r.name,
+    chest_number: r.chest_number,
+    class: r.class || null,
+    team_id: parseInt(r.team_id) || null,
+    extra_score: parseInt(r.extra_score) || 0,
+  }));
+
+  const { error } = await sb.from('students').upsert(rows, { onConflict: 'chest_number', ignoreDuplicates: false });
+
+  btn.disabled = false;
+  btn.innerHTML = 'Import Students';
+  if (error) {
+    showImportMsg('Error: ' + error.message, 'error');
+  } else {
+    showImportMsg(`✓ ${rows.length} students imported successfully!`, 'success');
+    csvData = [];
+    document.getElementById('csv-preview').style.display = 'none';
+    btn.style.display = 'none';
+    loadData();
+  }
+}
+
+function showImportMsg(text, type) {
+  const el = document.getElementById('import-msg');
+  el.textContent = text; el.className = 'msg-bar ' + type;
+  setTimeout(() => { el.className = 'msg-bar'; }, 5000);
+}
+
+// ── SCORE OVERVIEW ────────────────────────────────────────────────────────
+function renderOverview() {
+  // Summary cards
+  const teamTotals = { 1: 0, 2: 0, 3: 0, 4: 0 };
+  const studentsWithScores = allStudents.map(s => {
+    const { score: auto } = computeAutoScore(s.chest_number);
+    const total = auto + (s.extra_score || 0);
+    if (s.team_id) teamTotals[s.team_id] = (teamTotals[s.team_id] || 0) + total;
+    return { ...s, autoScore: auto, total };
+  }).sort((a, b) => b.total - a.total);
+
+  const cards = document.getElementById('score-cards');
+  cards.innerHTML = Object.entries(TEAMS).map(([id, t]) => `
+    <div class="score-card">
+      <div class="score-card-label" style="color:${t.color}">${t.name}</div>
+      <div class="score-card-val" style="color:${t.color}">${teamTotals[id] || 0}</div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:0.25rem">Student Points Total</div>
+    </div>`).join('') +
+    `<div class="score-card">
+      <div class="score-card-label">Total Students</div>
+      <div class="score-card-val">${allStudents.length}</div>
+    </div>
+    <div class="score-card">
+      <div class="score-card-label">Results Published</div>
+      <div class="score-card-val">${allResults.length}</div>
+    </div>`;
+
+  // Leaderboard
+  const tbody = document.getElementById('leaderboard-tbody');
+  if (!studentsWithScores.length) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="6">No students yet.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = studentsWithScores.map((s, i) => {
+    const { prizes } = computeAutoScore(s.chest_number);
+    const team = TEAMS[s.team_id];
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
+    return `<tr>
+      <td style="font-size:1rem">${medal}</td>
+      <td><div class="student-cell"><div class="avatar-sm">${(s.name||'?').charAt(0)}</div>${s.name}</div></td>
+      <td><span class="chest-tag">${s.chest_number}</span></td>
+      <td>${team ? `<span class="team-dot" style="background:${team.color}"></span>${team.name}` : '—'}</td>
+      <td style="font-size:0.8rem">${prizes.join(', ') || '—'}</td>
+      <td class="score-cell" style="font-size:1rem;font-weight:600">${s.total}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+if (sessionStorage.getItem('fhz_stu_admin')) {
+  loadData();
+  sb.channel('stu-admin-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, loadData)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'results' }, loadData)
+    .subscribe();
+}
+</script>
+</body>
+</html>

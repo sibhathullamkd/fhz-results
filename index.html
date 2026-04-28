@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FHZ Results — Art Fest Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0f0f8;
+    --muted: #7070a0;
+    --accent: #e8c86a;
+    --accent2: #6ab4e8;
+    --gold: #e8c86a;
+    --silver: #b0b8d0;
+    --bronze: #d4845a;
+    --green: #5ae8a0;
+    --red: #e85a5a;
+
+    /* Team colors */
+    --t1: #e85a8a;
+    --t2: #5ae8c8;
+    --t3: #e8a85a;
+    --t4: #8a5ae8;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+  }
+
+  .header-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-family: 'Playfair Display', serif;
+    font-weight: 900; font-size: 18px;
+    color: #0a0a0f;
+  }
+
+  .logo-text { font-weight: 600; font-size: 1rem; letter-spacing: 0.02em; }
+  .logo-sub { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .live-badge {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: rgba(232,88,90,0.15);
+    border: 1px solid rgba(232,88,90,0.3);
+    border-radius: 100px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em;
+    color: var(--red);
+    text-transform: uppercase;
+  }
+
+  .live-dot {
+    width: 7px; height: 7px;
+    background: var(--red);
+    border-radius: 50%;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  nav { display: flex; gap: 0.25rem; }
+
+  nav a {
+    padding: 0.4rem 0.9rem;
+    border-radius: 8px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem; font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  nav a:hover, nav a.active {
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative; z-index: 1;
+    text-align: center;
+    padding: 4rem 2rem 2rem;
+    max-width: 1400px; margin: 0 auto;
+  }
+
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(232,200,106,0.1);
+    border: 1px solid rgba(232,200,106,0.25);
+    border-radius: 100px;
+    padding: 0.3rem 1rem;
+    font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 500px; margin: 0 auto 2rem;
+  }
+
+  /* ── TABS ── */
+  .tab-bar {
+    position: relative; z-index: 1;
+    display: flex; justify-content: center; gap: 0.5rem;
+    padding: 0 2rem 2rem;
+  }
+
+  .tab-btn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem; font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .tab-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+
+  .tab-btn.active {
+    background: var(--accent);
+    color: #0a0a0f;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── MAIN CONTAINER ── */
+  main {
+    position: relative; z-index: 1;
+    max-width: 1400px; margin: 0 auto;
+    padding: 0 2rem 4rem;
+  }
+
+  .tab-pane { display: none; animation: fadeIn 0.4s ease; }
+  .tab-pane.active { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── SCOREBOARD ── */
+  .section-label {
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 1.25rem;
+  }
+
+  /* ── TEAM CARDS GRID ── */
+  .teams-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  @media (max-width: 900px) { .teams-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .teams-grid { grid-template-columns: 1fr; } }
+
+  .team-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .team-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+
+  .team-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--team-color);
+  }
+
+  .team-card .rank-badge {
+    position: absolute; top: 1rem; right: 1rem;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 0.75rem; font-weight: 700;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .rank-1 { background: rgba(232,200,106,0.2); color: var(--gold); }
+  .rank-2 { background: rgba(176,184,208,0.2); color: var(--silver); }
+  .rank-3 { background: rgba(212,132,90,0.2); color: var(--bronze); }
+  .rank-4 { background: rgba(255,255,255,0.05); color: var(--muted); }
+
+  .team-emoji { font-size: 2rem; margin-bottom: 0.5rem; display: block; }
+
+  .team-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; font-weight: 700;
+    color: var(--team-color);
+    margin-bottom: 0.25rem;
+  }
+
+  .team-score {
+    font-family: 'DM Mono', monospace;
+    font-size: 2.5rem; font-weight: 500;
+    line-height: 1.1;
+    margin: 0.5rem 0;
+  }
+
+  .team-detail { font-size: 0.75rem; color: var(--muted); margin-bottom: 1rem; }
+
+  .team-progress-wrap { margin-top: auto; }
+
+  .prog-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.7rem; color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .prog-track {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+  }
+
+  .prog-fill {
+    height: 100%;
+    background: var(--team-color);
+    border-radius: 3px;
+    width: 0;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .prize-pills { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: 0.75rem; }
+
+  .prize-pill {
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.04em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 100px;
+    border: 1px solid;
+  }
+
+  .pill-gold { color: var(--gold); border-color: rgba(232,200,106,0.3); background: rgba(232,200,106,0.08); }
+  .pill-silver { color: var(--silver); border-color: rgba(176,184,208,0.3); background: rgba(176,184,208,0.08); }
+  .pill-bronze { color: var(--bronze); border-color: rgba(212,132,90,0.3); background: rgba(212,132,90,0.08); }
+
+  /* ── LEADING BAR ── */
+  .leading-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .leading-title {
+    font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .race-bar {
+    position: relative;
+    height: 8px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    overflow: visible;
+  }
+
+  .race-seg {
+    position: absolute; top: 0; height: 100%;
+    border-radius: 4px;
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1), left 1.2s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .race-legend {
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    margin-top: 0.75rem;
+  }
+
+  .race-legend-item {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.75rem; color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── RESULTS GRID ── */
+  .results-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap; gap: 1rem;
+  }
+
+  .filter-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+  .filter-chip {
+    padding: 0.35rem 0.9rem;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem; cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-chip:hover { color: var(--text); }
+  .filter-chip.active { background: var(--surface2); border-color: rgba(255,255,255,0.15); color: var(--text); }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+  }
+
+  /* ── RESULT CARD ── */
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: default;
+  }
+
+  .result-card:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+
+  .card-banner {
+    width: 100%; height: 140px;
+    object-fit: cover;
+    display: block;
+    background: var(--surface2);
+  }
+
+  .card-banner-placeholder {
+    width: 100%; height: 140px;
+    background: linear-gradient(135deg, var(--surface2), var(--bg));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem;
+  }
+
+  .card-body { padding: 1.25rem; }
+
+  .card-category {
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; font-weight: 700;
+    margin-bottom: 1rem; line-height: 1.3;
+  }
+
+  .prize-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .prize-row {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+  }
+
+  .prize-icon { font-size: 0.9rem; flex-shrink: 0; }
+
+  .prize-info { flex: 1; min-width: 0; }
+
+  .prize-name {
+    font-size: 0.8rem; font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .prize-team { font-size: 0.7rem; color: var(--muted); }
+
+  .prize-grade {
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .grade-a { background: rgba(90,232,160,0.15); color: var(--green); }
+  .grade-b { background: rgba(106,180,232,0.15); color: var(--accent2); }
+  .grade-c { background: rgba(232,200,106,0.15); color: var(--accent); }
+
+  .no-result {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem; color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ── SEARCH STUDENTS TAB ── */
+  .search-section {
+    max-width: 640px; margin: 0 auto;
+    text-align: center;
+    padding: 2rem 0;
+  }
+
+  .search-box-wrap {
+    position: relative; margin-bottom: 2rem;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    padding-right: 4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem; letter-spacing: 0.1em;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(232,200,106,0.12);
+  }
+
+  .search-input::placeholder { color: var(--muted); font-size: 0.9rem; letter-spacing: 0.04em; }
+
+  .search-btn {
+    position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
+    width: 40px; height: 40px;
+    background: var(--accent);
+    border: none; border-radius: 10px;
+    color: #0a0a0f;
+    font-size: 1rem; cursor: pointer;
+    display: grid; place-items: center;
+    transition: opacity 0.2s;
+  }
+
+  .search-btn:hover { opacity: 0.85; }
+
+  .search-hint { font-size: 0.8rem; color: var(--muted); }
+
+  /* ── STUDENT PROFILE ── */
+  .student-profile { animation: fadeIn 0.4s ease; }
+
+  .profile-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .profile-avatar {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: grid; place-items: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; font-weight: 700;
+    color: #0a0a0f;
+    flex-shrink: 0;
+  }
+
+  .profile-info { flex: 1; min-width: 0; }
+
+  .profile-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  .profile-meta { font-size: 0.8rem; color: var(--muted); display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  .profile-meta span { display: flex; align-items: center; gap: 0.3rem; }
+
+  .profile-score-big {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .score-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 2.5rem; font-weight: 500;
+    color: var(--accent);
+    display: block;
+  }
+
+  .score-label { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .achievement-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+
+  .ach-icon { font-size: 1.5rem; flex-shrink: 0; }
+
+  .ach-info { flex: 1; min-width: 0; }
+
+  .ach-prog { font-size: 0.85rem; font-weight: 500; }
+  .ach-event { font-size: 0.75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .ach-pts {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem; font-weight: 500;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ── EMPTY / LOADING ── */
+  .empty-state {
+    text-align: center; padding: 4rem 2rem;
+    color: var(--muted);
+  }
+
+  .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty-state p { font-size: 0.9rem; }
+
+  .loading-spinner {
+    display: flex; justify-content: center; padding: 3rem;
+  }
+
+  .spinner {
+    width: 32px; height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── FLASH ── */
+  .new-flash {
+    animation: newFlash 2s ease forwards;
+  }
+
+  @keyframes newFlash {
+    0% { box-shadow: 0 0 0 0 rgba(232,200,106,0.6); }
+    50% { box-shadow: 0 0 0 8px rgba(232,200,106,0); }
+    100% { box-shadow: none; }
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 2rem;
+    color: var(--muted); font-size: 0.75rem;
+    border-top: 1px solid var(--border);
+    position: relative; z-index: 1;
+  }
+
+  .update-toast {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 200;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.85rem;
+    color: var(--accent);
+    display: none;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">F</div>
+      <div>
+        <div class="logo-text">FHZ Art Fest</div>
+        <div class="logo-sub">Live Results</div>
+      </div>
+    </div>
+    <nav>
+      <a class="active" onclick="showTab('scoreboard')">Scoreboard</a>
+      <a onclick="showTab('results')">Results</a>
+      <a onclick="showTab('students')">Search Students</a>
+    </nav>
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-tag">✦ FHz Fest Results — A GeekForge Project</div>
+  <h1>FHZ <span>Results</span><br>Live Portal</h1>
+  <p class="hero-sub">Real-time scores, programme results, and student achievements — all in one place.</p>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('scoreboard')">🏆 Scoreboard</button>
+  <button class="tab-btn" onclick="showTab('results')">📋 Programme Results</button>
+  <button class="tab-btn" onclick="showTab('students')">🔍 Search Students</button>
+</div>
+
+<main>
+  <!-- ── SCOREBOARD TAB ── -->
+  <div class="tab-pane active" id="tab-scoreboard">
+    <p class="section-label">Team Standings</p>
+
+    <div class="teams-grid" id="teams-grid">
+      <div class="loading-spinner"><div class="spinner"></div></div>
+    </div>
+
+    <div class="leading-section">
+      <div class="leading-title">Race to the Top</div>
+      <div class="race-bar" id="race-bar"></div>
+      <div class="race-legend" id="race-legend"></div>
+    </div>
+  </div>
+
+  <!-- ── RESULTS TAB ── -->
+  <div class="tab-pane" id="tab-results">
+    <div class="results-header">
+      <p class="section-label">Programme Results</p>
+      <div class="filter-row" id="filter-row">
+        <button class="filter-chip active" onclick="filterResults('all', this)">All</button>
+      </div>
+    </div>
+    <div class="results-grid" id="results-grid">
+      <div class="loading-spinner"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- ── STUDENTS TAB ── -->
+  <div class="tab-pane" id="tab-students">
+    <div class="search-section">
+      <p class="section-label" style="text-align:center">Student Lookup</p>
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;margin-bottom:0.5rem;">Find Your Results</h2>
+      <p style="color:var(--muted);font-size:0.9rem;margin-bottom:2rem;">Enter your chest number to view your score, prizes, and achievements.</p>
+      <div class="search-box-wrap">
+        <input class="search-input" id="chest-input" type="text" placeholder="Enter Chest Number (e.g. 101)" maxlength="10">
+        <button class="search-btn" onclick="searchStudent()">→</button>
+      </div>
+      <p class="search-hint">Your chest number is printed on your participant card.</p>
+    </div>
+    <div id="student-result"></div>
+  </div>
+</main>
+
+<footer>
+  FHZ Unreal Art Fest , Developed by <a href="https://sibhathullamkd.github.io/" style="color: #7070a0; text-decoration: none;"><b>sibhathullamkd</b></a>
+</footer>
+
+<div class="update-toast" id="update-toast">✦ Results updated!</div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const TEAMS = [
+  { id: 1, name: 'Team Alpha', emoji: '🔥', color: 'var(--t1)' },
+  { id: 2, name: 'Team Beta',  emoji: '🌊', color: 'var(--t2)' },
+  { id: 3, name: 'Team Gamma', emoji: '⚡', color: 'var(--t3)' },
+  { id: 4, name: 'Team Delta', emoji: '🌙', color: 'var(--t4)' },
+];
+
+const PRIZE_SCORES = { '1st': 5, '2nd': 3, '3rd': 1 };
+const PRIZE_ICONS  = { '1st': '🥇', '2nd': '🥈', '3rd': '🥉' };
+
+let allResults = [];
+let allStudents = [];
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn')[['scoreboard','results','students'].indexOf(name)].classList.add('active');
+  document.querySelectorAll('nav a')[['scoreboard','results','students'].indexOf(name)].classList.add('active');
+}
+
+// ── SCOREBOARD ────────────────────────────────────────────────────────────
+function computeTeamStats(results) {
+  const stats = {};
+  TEAMS.forEach(t => { stats[t.id] = { gold: 0, silver: 0, bronze: 0, score: 0 }; });
+  results.forEach(r => {
+    ['1st','2nd','3rd'].forEach(p => {
+      const tid = r[`${p}_team_id`];
+      if (!tid) return;
+      const key = p === '1st' ? 'gold' : p === '2nd' ? 'silver' : 'bronze';
+      stats[tid][key] = (stats[tid][key] || 0) + 1;
+      stats[tid].score = (stats[tid].score || 0) + (PRIZE_SCORES[p] || 0);
+    });
+  });
+  return stats;
+}
+
+function renderScoreboard(results) {
+  const stats = computeTeamStats(results);
+  const sorted = TEAMS
+    .map(t => ({ ...t, ...stats[t.id] }))
+    .sort((a, b) => b.score - a.score);
+
+  const maxScore = sorted[0]?.score || 1;
+  const totalScore = sorted.reduce((s, t) => s + t.score, 0) || 1;
+
+  const grid = document.getElementById('teams-grid');
+  grid.innerHTML = '';
+
+  sorted.forEach((t, i) => {
+    const rankClass = ['rank-1','rank-2','rank-3','rank-4'][i];
+    const rankLabel = ['1st','2nd','3rd','4th'][i];
+    const pct = Math.round((t.score / maxScore) * 100);
+
+    grid.innerHTML += `
+      <div class="team-card" style="--team-color:${t.color}">
+        <div class="rank-badge ${rankClass}">${rankLabel}</div>
+        <span class="team-emoji">${t.emoji}</span>
+        <div class="team-name">${t.name}</div>
+        <div class="team-score">${t.score}</div>
+        <div class="team-detail">Total Points</div>
+        <div class="team-progress-wrap">
+          <div class="prog-label"><span>Progress</span><span>${pct}%</span></div>
+          <div class="prog-track"><div class="prog-fill" data-pct="${pct}" style="background:${t.color}"></div></div>
+          <div class="prize-pills">
+            <span class="prize-pill pill-gold">🥇 ${t.gold}</span>
+            <span class="prize-pill pill-silver">🥈 ${t.silver}</span>
+            <span class="prize-pill pill-bronze">🥉 ${t.bronze}</span>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  // Animate bars
+  setTimeout(() => {
+    document.querySelectorAll('.prog-fill').forEach(el => {
+      el.style.width = el.dataset.pct + '%';
+    });
+  }, 100);
+
+  // Race bar
+  const racebar = document.getElementById('race-bar');
+  const legend = document.getElementById('race-legend');
+  racebar.innerHTML = '';
+  legend.innerHTML = '';
+  let offset = 0;
+  sorted.forEach(t => {
+    const w = Math.round((t.score / totalScore) * 100);
+    racebar.innerHTML += `<div class="race-seg" style="left:${offset}%;width:${w}%;background:${t.color}"></div>`;
+    legend.innerHTML += `<div class="race-legend-item"><div class="legend-dot" style="background:${t.color}"></div>${t.name}: <strong>${t.score}pts</strong></div>`;
+    offset += w;
+  });
+}
+
+// ── RESULTS ───────────────────────────────────────────────────────────────
+function buildFilters(results) {
+  const cats = [...new Set(results.map(r => r.category).filter(Boolean))];
+  const row = document.getElementById('filter-row');
+  row.innerHTML = `<button class="filter-chip active" onclick="filterResults('all',this)">All</button>`;
+  cats.forEach(c => {
+    row.innerHTML += `<button class="filter-chip" onclick="filterResults('${c}',this)">${c}</button>`;
+  });
+}
+
+function filterResults(cat, btn) {
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = cat === 'all' ? allResults : allResults.filter(r => r.category === cat);
+  renderResultCards(filtered);
+}
+
+function renderResultCards(results) {
+  const grid = document.getElementById('results-grid');
+  if (!results.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>No results published yet.</p></div>`;
+    return;
+  }
+  grid.innerHTML = results.map(r => resultCardHTML(r)).join('');
+}
+
+function resultCardHTML(r) {
+  const teamColor = (tid) => TEAMS.find(t => t.id === tid)?.color || 'var(--muted)';
+  const teamName = (tid) => TEAMS.find(t => t.id === tid)?.name || '—';
+
+  const prizeRow = (place, key) => {
+    if (!r[`${key}_name`]) return '';
+    const grade = r[`${key}_grade`] || '';
+    const gradeClass = grade === 'A' ? 'grade-a' : grade === 'B' ? 'grade-b' : 'grade-c';
+    return `<div class="prize-row">
+      <div class="prize-icon">${PRIZE_ICONS[place]}</div>
+      <div class="prize-info">
+        <div class="prize-name">${r[`${key}_name`]}</div>
+        <div class="prize-team" style="color:${teamColor(r[`${key}_team_id`])}">${teamName(r[`${key}_team_id`])}</div>
+      </div>
+      ${grade ? `<div class="prize-grade ${gradeClass}">${grade}</div>` : ''}
+    </div>`;
+  };
+
+  const banner = r.banner_url
+    ? `<img class="card-banner" src="${r.banner_url}" alt="${r.programme_name}" loading="lazy">`
+    : `<div class="card-banner-placeholder">${r.emoji || '🎭'}</div>`;
+
+  return `<div class="result-card">
+    ${banner}
+    <div class="card-body">
+      <div class="card-category">${r.category || 'General'}</div>
+      <div class="card-title">${r.programme_name}</div>
+      <div class="prize-list">
+        ${prizeRow('1st','first') || prizeRow('2nd','second') || prizeRow('3rd','third')
+          ? prizeRow('1st','first') + prizeRow('2nd','second') + prizeRow('3rd','third')
+          : '<div class="no-result">Results pending...</div>'}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── STUDENTS ──────────────────────────────────────────────────────────────
+function searchStudent() {
+  const chest = document.getElementById('chest-input').value.trim();
+  if (!chest) return;
+  const container = document.getElementById('student-result');
+  container.innerHTML = `<div class="loading-spinner"><div class="spinner"></div></div>`;
+
+  // Build from results
+  const studentAchievements = [];
+  let totalScore = 0;
+
+  allResults.forEach(r => {
+    ['1st','2nd','3rd'].forEach((place, pi) => {
+      const key = ['first','second','third'][pi];
+      const chests = (r[`${key}_chest_numbers`] || '').toString().split(',').map(s => s.trim());
+      if (chests.includes(chest)) {
+        const pts = PRIZE_SCORES[place] || 0;
+        totalScore += pts;
+        studentAchievements.push({ place, programme: r.programme_name, category: r.category, pts });
+      }
+    });
+  });
+
+  // Also check students table
+  sb.from('students').select('*').eq('chest_number', chest).single().then(({ data }) => {
+    if (!data && studentAchievements.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>No student found with chest number <strong>${chest}</strong>.</p></div>`;
+      return;
+    }
+
+    const name = data?.name || 'Student #' + chest;
+    const teamId = data?.team_id;
+    const team = TEAMS.find(t => t.id === teamId);
+    const initial = name.charAt(0).toUpperCase();
+
+    // Merge manual score if exists
+    if (data?.extra_score) totalScore += data.extra_score;
+
+    const achHTML = studentAchievements.length
+      ? studentAchievements.map(a => `
+          <div class="achievement-card">
+            <div class="ach-icon">${PRIZE_ICONS[a.place]}</div>
+            <div class="ach-info">
+              <div class="ach-prog">${a.place} Prize</div>
+              <div class="ach-event">${a.programme} · ${a.category || ''}</div>
+            </div>
+            <div class="ach-pts">+${a.pts}pts</div>
+          </div>`).join('')
+      : `<div class="empty-state" style="padding:2rem"><div class="icon">🎯</div><p>No prizes yet. Keep it up!</p></div>`;
+
+    container.innerHTML = `
+      <div class="student-profile">
+        <div class="profile-header">
+          <div class="profile-avatar">${initial}</div>
+          <div class="profile-info">
+            <div class="profile-name">${name}</div>
+            <div class="profile-meta">
+              <span>🎫 Chest #${chest}</span>
+              ${team ? `<span style="color:${team.color}">● ${team.name}</span>` : ''}
+              ${data?.class ? `<span>📚 ${data.class}</span>` : ''}
+            </div>
+          </div>
+          <div class="profile-score-big">
+            <span class="score-num">${totalScore}</span>
+            <span class="score-label">Total Points</span>
+          </div>
+        </div>
+        <p class="section-label" style="margin-bottom:1rem">Achievements (${studentAchievements.length})</p>
+        <div class="achievements-grid">${achHTML}</div>
+      </div>`;
+  });
+}
+
+document.getElementById('chest-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') searchStudent();
+});
+
+// ── REALTIME + INIT ────────────────────────────────────────────────────────
+async function loadAll() {
+  const [{ data: results }, { data: students }] = await Promise.all([
+    sb.from('results').select('*').order('created_at', { ascending: false }),
+    sb.from('students').select('*'),
+  ]);
+
+  allResults = results || [];
+  allStudents = students || [];
+
+  renderScoreboard(allResults);
+  buildFilters(allResults);
+  renderResultCards(allResults);
+}
+
+function showToast() {
+  const t = document.getElementById('update-toast');
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+// Subscribe realtime
+sb.channel('results-changes')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'results' }, () => {
+    loadAll(); showToast();
+  })
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, () => {
+    loadAll();
+  })
+  .subscribe();
+
+loadAll();
+</script>
+</body>
+</html>
