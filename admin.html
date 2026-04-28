@@ -9,158 +9,138 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a26;
-    --border: rgba(255,255,255,0.07); --text: #f0f0f8; --muted: #7070a0;
-    --accent: #e8c86a; --red: #e85a5a; --green: #5ae8a0;
-    --t1: #e85a8a; --t2: #5ae8c8; --t3: #e8a85a; --t4: #8a5ae8;
-  }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a26; --surface3: #20202e;
+  --border: rgba(255,255,255,0.07); --text: #f0f0f8; --muted: #7070a0;
+  --accent: #e8c86a; --red: #e85a5a; --green: #5ae8a0; --blue: #5ab4e8;
+  --t1: #e85a8a; --t2: #5ae8c8; --t3: #e8a85a; --t4: #8a5ae8;
+}
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
 
-  /* LOGIN */
-  .login-screen {
-    min-height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    padding: 2rem;
-  }
-  .login-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 20px; padding: 2.5rem;
-    width: 100%; max-width: 400px;
-    text-align: center;
-  }
-  .login-card .logo-mark {
-    width: 56px; height: 56px; background: var(--accent);
-    border-radius: 14px; display: grid; place-items: center;
-    font-family: 'Playfair Display', serif; font-size: 24px;
-    font-weight: 900; color: #0a0a0f; margin: 0 auto 1.5rem;
-  }
-  .login-card h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem; }
-  .login-card p { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
+/* ── LOGIN ─────────────────────────────────────────────────────── */
+.login-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem; }
+.login-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2.5rem; width:100%; max-width:400px; text-align:center; }
+.logo-mark { width:56px; height:56px; background:var(--accent); border-radius:14px; display:grid; place-items:center; font-family:'Playfair Display',serif; font-size:24px; font-weight:900; color:#0a0a0f; margin:0 auto 1.5rem; }
+.login-card h2 { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:.5rem; }
+.login-card p { color:var(--muted); font-size:.85rem; margin-bottom:2rem; }
 
-  /* SHARED FORM STYLES */
-  .field { margin-bottom: 1.25rem; text-align: left; }
-  .field label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
-  .field input, .field select, .field textarea {
-    width: 100%; padding: 0.75rem 1rem;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 10px; color: var(--text);
-    font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
-    outline: none; transition: border-color 0.2s;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--accent);
-  }
-  .field select option { background: #1a1a26; }
-  .field textarea { resize: vertical; min-height: 70px; }
+/* ── FORM ELEMENTS ─────────────────────────────────────────────── */
+.field { margin-bottom:1.1rem; text-align:left; }
+.field label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:.4rem; }
+.field input,.field select,.field textarea { width:100%; padding:.7rem 1rem; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:.88rem; outline:none; transition:border-color .2s; }
+.field input:focus,.field select:focus,.field textarea:focus { border-color:var(--accent); }
+.field select option { background:#1a1a26; }
+.field textarea { resize:vertical; min-height:60px; }
+.btn { width:100%; padding:.82rem; background:var(--accent); border:none; border-radius:10px; color:#0a0a0f; font-family:'DM Sans',sans-serif; font-size:.92rem; font-weight:700; cursor:pointer; transition:opacity .2s; }
+.btn:hover { opacity:.85; }
+.btn.danger { background:var(--red); color:#fff; }
+.btn.secondary { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
+.btn.sm { width:auto; padding:.4rem .85rem; font-size:.78rem; }
+.btn.blue { background:var(--blue); color:#0a0a0f; }
+.error-msg { color:var(--red); font-size:.8rem; margin-top:.75rem; text-align:center; }
 
-  .btn {
-    width: 100%; padding: 0.85rem;
-    background: var(--accent); border: none; border-radius: 10px;
-    color: #0a0a0f; font-family: 'DM Sans', sans-serif;
-    font-size: 0.95rem; font-weight: 600; cursor: pointer;
-    transition: opacity 0.2s;
-  }
-  .btn:hover { opacity: 0.85; }
-  .btn.danger { background: var(--red); color: #fff; }
-  .btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-  .btn.sm { width: auto; padding: 0.45rem 1rem; font-size: 0.8rem; }
+/* ── LAYOUT ────────────────────────────────────────────────────── */
+#admin-ui { display:none; }
+.admin-header { background:var(--surface); border-bottom:1px solid var(--border); padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+.admin-header .logo { display:flex; align-items:center; gap:.75rem; }
+.admin-header .logo-mark { width:36px; height:36px; font-size:18px; margin:0; }
+.admin-title { font-weight:700; font-size:.95rem; }
+.admin-sub { font-size:.7rem; color:var(--muted); }
+.logout-btn { background:none; border:1px solid var(--border); border-radius:8px; padding:.4rem .9rem; color:var(--muted); cursor:pointer; font-size:.8rem; transition:all .2s; }
+.logout-btn:hover { color:var(--text); border-color:rgba(255,255,255,.2); }
 
-  .error-msg { color: var(--red); font-size: 0.8rem; margin-top: 0.75rem; text-align: center; }
-  .success-msg { color: var(--green); font-size: 0.8rem; margin-top: 0.75rem; text-align: center; }
+/* ── TABS ──────────────────────────────────────────────────────── */
+.tab-bar { display:flex; gap:.25rem; background:var(--surface); border-bottom:1px solid var(--border); padding:0 2rem; }
+.tab-btn { padding:.85rem 1.25rem; background:none; border:none; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:.85rem; font-weight:600; cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap; }
+.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-btn:hover:not(.active) { color:var(--text); }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
 
-  /* ADMIN LAYOUT */
-  #admin-ui { display: none; }
-  .admin-header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 1rem 2rem;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .admin-header .logo { display: flex; align-items: center; gap: 0.75rem; }
-  .admin-header .logo-mark { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: grid; place-items: center; font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 900; color: #0a0a0f; }
-  .admin-title { font-weight: 600; font-size: 0.95rem; }
-  .admin-sub { font-size: 0.7rem; color: var(--muted); }
-  .logout-btn { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem 0.9rem; color: var(--muted); cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
-  .logout-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+/* ── ADMIN BODY ────────────────────────────────────────────────── */
+.admin-body { max-width:1200px; margin:0 auto; padding:2rem; }
+.two-col { display:grid; grid-template-columns:380px 1fr; gap:2rem; align-items:start; }
+@media(max-width:860px){ .two-col { grid-template-columns:1fr; } }
+.panel { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.75rem; margin-bottom:1.5rem; }
+.panel-title { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:1.4rem; padding-bottom:.9rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:.5rem; }
+.msg-bar { padding:.7rem 1rem; border-radius:10px; margin-bottom:1rem; font-size:.83rem; display:none; }
+.msg-bar.success { background:rgba(90,232,160,.1); border:1px solid rgba(90,232,160,.25); color:var(--green); display:block; }
+.msg-bar.error { background:rgba(232,90,90,.1); border:1px solid rgba(232,90,90,.25); color:var(--red); display:block; }
+.spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(10,10,15,.3); border-top-color:#0a0a0f; border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; margin-right:.35rem; }
+@keyframes spin { to { transform:rotate(360deg); } }
 
-  .admin-body {
-    max-width: 1200px; margin: 0 auto;
-    padding: 2rem;
-    display: grid; grid-template-columns: 380px 1fr; gap: 2rem;
-    align-items: start;
-  }
-  @media (max-width: 800px) { .admin-body { grid-template-columns: 1fr; } }
+/* ── PRIZE GROUPS ──────────────────────────────────────────────── */
+.prize-group { background:var(--surface2); border-radius:12px; padding:1rem; margin-bottom:.9rem; border:1px solid var(--border); }
+.prize-group-label { font-size:.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:.75rem; }
+.prize-row-fields { display:grid; grid-template-columns:1fr 1fr; gap:.65rem; }
 
-  .panel {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 1.75rem;
-  }
-  .panel-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem;
-    padding-bottom: 1rem; border-bottom: 1px solid var(--border);
-  }
+/* ── RESULTS TABLE ─────────────────────────────────────────────── */
+.results-table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:.82rem; }
+th { text-align:left; padding:.6rem .75rem; font-size:.68rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); }
+td { padding:.7rem .75rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(255,255,255,.02); }
+.prog-badge { display:inline-block; padding:.15rem .5rem; border-radius:4px; font-size:.7rem; font-weight:600; background:rgba(232,200,106,.1); color:var(--accent); }
+.action-btns { display:flex; gap:.4rem; }
+.tag { display:inline-block; padding:.1rem .4rem; border-radius:4px; font-size:.68rem; font-weight:600; }
+.tag-gold { background:rgba(232,200,106,.15); color:var(--accent); }
+.tag-silver { background:rgba(176,184,208,.15); color:#b0b8d0; }
+.tag-bronze { background:rgba(212,132,90,.15); color:#d4845a; }
+.empty-row td { text-align:center; color:var(--muted); padding:2.5rem; }
 
-  /* PRIZE GROUP */
-  .prize-group {
-    background: var(--surface2); border-radius: 12px;
-    padding: 1rem; margin-bottom: 1rem;
-  }
-  .prize-group-label {
-    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
-    text-transform: uppercase; color: var(--muted);
-    margin-bottom: 0.75rem;
-  }
-  .prize-row-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+/* ── TEAM STANDINGS ────────────────────────────────────────────── */
+.teams-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+.team-card {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:14px; padding:1.25rem; position:relative; overflow:hidden;
+  transition:border-color .2s;
+}
+.team-card:hover { border-color:rgba(255,255,255,.15); }
+.team-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+}
+.team-card[data-team="1"]::before { background:var(--t1); }
+.team-card[data-team="2"]::before { background:var(--t2); }
+.team-card[data-team="3"]::before { background:var(--t3); }
+.team-card[data-team="4"]::before { background:var(--t4); }
+.team-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+.team-name { font-weight:700; font-size:.95rem; }
+.team-id-badge { font-size:.68rem; font-weight:600; padding:.2rem .5rem; border-radius:4px; background:rgba(255,255,255,.07); color:var(--muted); }
+.team-score-row { display:flex; align-items:center; gap:.75rem; margin-bottom:.75rem; }
+.team-score-display { font-family:'DM Mono',monospace; font-size:2rem; font-weight:500; line-height:1; }
+.team-score-display[data-team="1"] { color:var(--t1); }
+.team-score-display[data-team="2"] { color:var(--t2); }
+.team-score-display[data-team="3"] { color:var(--t3); }
+.team-score-display[data-team="4"] { color:var(--t4); }
+.score-breakdown { font-size:.72rem; color:var(--muted); line-height:1.6; }
+.team-edit-row { display:flex; gap:.5rem; margin-top:.9rem; }
+.team-edit-row input { flex:1; padding:.5rem .75rem; background:var(--surface3); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'DM Mono',monospace; font-size:.9rem; outline:none; }
+.team-edit-row input:focus { border-color:var(--accent); }
+.team-save-btn { padding:.5rem 1rem; background:var(--accent); border:none; border-radius:8px; color:#0a0a0f; font-weight:700; font-size:.78rem; cursor:pointer; transition:opacity .2s; white-space:nowrap; }
+.team-save-btn:hover { opacity:.85; }
+.team-save-btn.saving { opacity:.6; pointer-events:none; }
 
-  /* TABLE */
-  .results-table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-  th {
-    text-align: left; padding: 0.6rem 0.75rem;
-    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
-    text-transform: uppercase; color: var(--muted);
-    border-bottom: 1px solid var(--border);
-  }
-  td { padding: 0.75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,0.02); }
+.standings-live-label {
+  display:inline-flex; align-items:center; gap:.4rem;
+  font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--green); margin-bottom:1.25rem;
+}
+.live-dot { width:7px; height:7px; border-radius:50%; background:var(--green); animation:pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.5;transform:scale(.8);} }
 
-  .prog-badge {
-    display: inline-block; padding: 0.15rem 0.5rem;
-    border-radius: 4px; font-size: 0.7rem; font-weight: 600;
-    background: rgba(232,200,106,0.1); color: var(--accent);
-  }
+.standings-info { font-size:.8rem; color:var(--muted); margin-bottom:1.5rem; line-height:1.6; background:rgba(232,200,106,.06); border:1px solid rgba(232,200,106,.12); border-radius:10px; padding:.85rem 1rem; }
+.standings-info strong { color:var(--accent); }
 
-  .action-btns { display: flex; gap: 0.5rem; }
-
-  .tag { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.68rem; font-weight: 600; }
-  .tag-gold { background: rgba(232,200,106,0.15); color: var(--accent); }
-  .tag-silver { background: rgba(176,184,208,0.15); color: #b0b8d0; }
-  .tag-bronze { background: rgba(212,132,90,0.15); color: #d4845a; }
-
-  .empty-row td { text-align: center; color: var(--muted); padding: 2.5rem; }
-
-  .msg-bar {
-    padding: 0.75rem 1rem; border-radius: 10px; margin-bottom: 1rem;
-    font-size: 0.85rem; display: none;
-  }
-  .msg-bar.success { background: rgba(90,232,160,0.1); border: 1px solid rgba(90,232,160,0.25); color: var(--green); display: block; }
-  .msg-bar.error { background: rgba(232,90,90,0.1); border: 1px solid rgba(232,90,90,0.25); color: var(--red); display: block; }
-
-  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(10,10,15,0.3); border-top-color: #0a0a0f; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 0.4rem; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* MANAGE PROGRAMMES */
-  .prog-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
-  .prog-item {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--surface2); border-radius: 8px; padding: 0.6rem 0.9rem;
-    font-size: 0.85rem;
-  }
-  .prog-item-name { font-weight: 500; }
-  .prog-item-cat { font-size: 0.7rem; color: var(--muted); }
+.rank-table { width:100%; border-collapse:collapse; margin-top:1.25rem; }
+.rank-table th { font-size:.68rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding:.5rem .75rem; border-bottom:1px solid var(--border); text-align:left; }
+.rank-table td { padding:.65rem .75rem; border-bottom:1px solid var(--border); font-size:.82rem; }
+.rank-table tr:last-child td { border-bottom:none; }
+.rank-num { font-family:'DM Mono',monospace; font-weight:700; font-size:.95rem; }
+.rank-1 { color:gold; }
+.rank-2 { color:#b0b8d0; }
+.rank-3 { color:#d4845a; }
 </style>
 </head>
 <body>
@@ -184,151 +164,233 @@
 <div id="admin-ui">
   <div class="admin-header">
     <div class="logo">
-      <div class="logo-mark">F</div>
+      <div class="logo-mark" style="width:36px;height:36px;font-size:18px;margin:0">F</div>
       <div>
         <div class="admin-title">Results Admin</div>
-        <div class="admin-sub">FHZ Art Fest 2024</div>
+        <div class="admin-sub">FHZ Art Fest</div>
       </div>
     </div>
-    <div style="display:flex;gap:0.75rem;align-items:center">
-      <a href="students_admin.html" style="color:var(--muted);font-size:0.8rem;text-decoration:none;">Students Admin →</a>
+    <div style="display:flex;gap:.75rem;align-items:center">
+      <a href="students_admin.html" style="color:var(--muted);font-size:.8rem;text-decoration:none;">Students Admin →</a>
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
   </div>
 
-  <div class="admin-body">
-    <!-- LEFT: Form -->
-    <div>
-      <div class="panel">
-        <div class="panel-title" id="form-title">✦ Add Programme Result</div>
-        <div class="msg-bar" id="form-msg"></div>
+  <!-- TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('results',this)">📋 Programme Results</button>
+    <button class="tab-btn" onclick="switchTab('standings',this)">🏆 Team Standings</button>
+  </div>
 
-        <input type="hidden" id="editing-id">
+  <!-- TAB: RESULTS -->
+  <div class="tab-content active" id="tab-results">
+    <div class="admin-body">
+      <div class="two-col">
+        <!-- LEFT: Form -->
+        <div>
+          <div class="panel">
+            <div class="panel-title" id="form-title">✦ Add Programme Result</div>
+            <div class="msg-bar" id="form-msg"></div>
+            <input type="hidden" id="editing-id">
 
-        <div class="field">
-          <label>Programme Name *</label>
-          <input type="text" id="f-prog" placeholder="e.g. Solo Dance, Elocution...">
-        </div>
-        <div class="field">
-          <label>Category</label>
-          <input type="text" id="f-cat" placeholder="e.g. Dance, Music, Literary...">
-        </div>
-        <div class="field">
-          <label>Emoji Icon</label>
-          <input type="text" id="f-emoji" placeholder="🎭" maxlength="4">
-        </div>
-        <div class="field">
-          <label>Banner Image URL (optional)</label>
-          <input type="url" id="f-banner" placeholder="https://...">
-        </div>
-
-        <!-- 1st Prize -->
-        <div class="prize-group">
-          <div class="prize-group-label">🥇 1st Prize</div>
-          <div class="field"><label>Student Name</label><input type="text" id="f-1-name" placeholder="Name"></div>
-          <div class="prize-row-fields">
-            <div class="field"><label>Team</label>
-              <select id="f-1-team">
-                <option value="">— Team —</option>
-                <option value="1">Team Alpha</option>
-                <option value="2">Team Beta</option>
-                <option value="3">Team Gamma</option>
-                <option value="4">Team Delta</option>
-              </select>
+            <div class="field">
+              <label>Programme Name *</label>
+              <input type="text" id="f-prog" placeholder="e.g. Solo Dance, Elocution...">
             </div>
-            <div class="field"><label>Grade</label>
-              <select id="f-1-grade">
-                <option value="">— Grade —</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-              </select>
+            <div class="field">
+              <label>Category</label>
+              <input type="text" id="f-cat" placeholder="e.g. Dance, Music, Literary...">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+              <div class="field">
+                <label>Emoji Icon</label>
+                <input type="text" id="f-emoji" placeholder="🎭" maxlength="4">
+              </div>
+              <div class="field">
+                <label>Banner Image URL</label>
+                <input type="url" id="f-banner" placeholder="https://...">
+              </div>
+            </div>
+
+            <!-- 1st Prize -->
+            <div class="prize-group">
+              <div class="prize-group-label">🥇 1st Prize</div>
+              <div class="field"><label>Student Name</label><input type="text" id="f-1-name" placeholder="Name"></div>
+              <div class="prize-row-fields">
+                <div class="field"><label>Team</label>
+                  <select id="f-1-team">
+                    <option value="">— Team —</option>
+                    <option value="1">Team Alpha</option>
+                    <option value="2">Team Beta</option>
+                    <option value="3">Team Gamma</option>
+                    <option value="4">Team Delta</option>
+                  </select>
+                </div>
+                <div class="field"><label>Grade</label>
+                  <select id="f-1-grade">
+                    <option value="">— Grade —</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field"><label>Chest Numbers (comma-separated)</label><input type="text" id="f-1-chests" placeholder="101, 102"></div>
+            </div>
+
+            <!-- 2nd Prize -->
+            <div class="prize-group">
+              <div class="prize-group-label">🥈 2nd Prize</div>
+              <div class="field"><label>Student Name</label><input type="text" id="f-2-name" placeholder="Name"></div>
+              <div class="prize-row-fields">
+                <div class="field"><label>Team</label>
+                  <select id="f-2-team">
+                    <option value="">— Team —</option>
+                    <option value="1">Team Alpha</option>
+                    <option value="2">Team Beta</option>
+                    <option value="3">Team Gamma</option>
+                    <option value="4">Team Delta</option>
+                  </select>
+                </div>
+                <div class="field"><label>Grade</label>
+                  <select id="f-2-grade">
+                    <option value="">— Grade —</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field"><label>Chest Numbers (comma-separated)</label><input type="text" id="f-2-chests" placeholder="201, 202"></div>
+            </div>
+
+            <!-- 3rd Prize -->
+            <div class="prize-group">
+              <div class="prize-group-label">🥉 3rd Prize</div>
+              <div class="field"><label>Student Name</label><input type="text" id="f-3-name" placeholder="Name"></div>
+              <div class="prize-row-fields">
+                <div class="field"><label>Team</label>
+                  <select id="f-3-team">
+                    <option value="">— Team —</option>
+                    <option value="1">Team Alpha</option>
+                    <option value="2">Team Beta</option>
+                    <option value="3">Team Gamma</option>
+                    <option value="4">Team Delta</option>
+                  </select>
+                </div>
+                <div class="field"><label>Grade</label>
+                  <select id="f-3-grade">
+                    <option value="">— Grade —</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field"><label>Chest Numbers (comma-separated)</label><input type="text" id="f-3-chests" placeholder="301"></div>
+            </div>
+
+            <div style="display:flex;gap:.75rem;margin-top:.5rem">
+              <button class="btn" onclick="submitResult()" id="submit-btn">Submit Result</button>
+              <button class="btn secondary sm" onclick="clearForm()" style="flex-shrink:0;align-self:center">Clear</button>
             </div>
           </div>
-          <div class="field"><label>Chest Numbers (comma-separated)</label><input type="text" id="f-1-chests" placeholder="101, 102"></div>
         </div>
 
-        <!-- 2nd Prize -->
-        <div class="prize-group">
-          <div class="prize-group-label">🥈 2nd Prize</div>
-          <div class="field"><label>Student Name</label><input type="text" id="f-2-name" placeholder="Name"></div>
-          <div class="prize-row-fields">
-            <div class="field"><label>Team</label>
-              <select id="f-2-team">
-                <option value="">— Team —</option>
-                <option value="1">Team Alpha</option>
-                <option value="2">Team Beta</option>
-                <option value="3">Team Gamma</option>
-                <option value="4">Team Delta</option>
-              </select>
-            </div>
-            <div class="field"><label>Grade</label>
-              <select id="f-2-grade">
-                <option value="">— Grade —</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-              </select>
+        <!-- RIGHT: Table -->
+        <div>
+          <div class="panel">
+            <div class="panel-title">All Programme Results</div>
+            <div class="results-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Programme</th>
+                    <th>Category</th>
+                    <th>1st</th>
+                    <th>2nd</th>
+                    <th>3rd</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="results-tbody">
+                  <tr class="empty-row"><td colspan="6">Loading...</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
-          <div class="field"><label>Chest Numbers (comma-separated)</label><input type="text" id="f-2-chests" placeholder="201, 202"></div>
-        </div>
-
-        <!-- 3rd Prize -->
-        <div class="prize-group">
-          <div class="prize-group-label">🥉 3rd Prize</div>
-          <div class="field"><label>Student Name</label><input type="text" id="f-3-name" placeholder="Name"></div>
-          <div class="prize-row-fields">
-            <div class="field"><label>Team</label>
-              <select id="f-3-team">
-                <option value="">— Team —</option>
-                <option value="1">Team Alpha</option>
-                <option value="2">Team Beta</option>
-                <option value="3">Team Gamma</option>
-                <option value="4">Team Delta</option>
-              </select>
-            </div>
-            <div class="field"><label>Grade</label>
-              <select id="f-3-grade">
-                <option value="">— Grade —</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-              </select>
-            </div>
-          </div>
-          <div class="field"><label>Chest Numbers (comma-separated)</label><input type="text" id="f-3-chests" placeholder="301"></div>
-        </div>
-
-        <div style="display:flex;gap:0.75rem;margin-top:0.5rem">
-          <button class="btn" onclick="submitResult()" id="submit-btn">Submit Result</button>
-          <button class="btn secondary sm" onclick="clearForm()" style="flex-shrink:0">Clear</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- RIGHT: Table -->
-    <div>
+  <!-- TAB: STANDINGS -->
+  <div class="tab-content" id="tab-standings">
+    <div class="admin-body">
+
       <div class="panel">
-        <div class="panel-title">All Programme Results</div>
-        <div class="results-table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Programme</th>
-                <th>Category</th>
-                <th>1st</th>
-                <th>2nd</th>
-                <th>3rd</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="results-tbody">
-              <tr class="empty-row"><td colspan="6">Loading...</td></tr>
-            </tbody>
-          </table>
+        <div class="panel-title">🏆 Team Standings Manager</div>
+        <div class="standings-info">
+          <strong>How scoring works:</strong> Each team's total score is calculated automatically from programme results
+          (1st = 5pts, 2nd = 3pts, 3rd = 1pt by default). Use the <strong>Extra Score</strong> field below to add
+          bonus points or corrections for each team. The <strong>Total</strong> shown is auto-score + extra score.
+        </div>
+        <div class="standings-live-label">
+          <div class="live-dot"></div>
+          Live Standings
+        </div>
+        <div class="msg-bar" id="standings-msg"></div>
+
+        <div class="teams-grid" id="teams-grid">
+          <!-- Team cards injected here -->
+          <div style="color:var(--muted);font-size:.85rem;padding:1rem">Loading teams...</div>
+        </div>
+
+        <!-- Live rank preview -->
+        <div style="margin-top:2rem;">
+          <div class="panel-title" style="font-size:.95rem;">Current Rank Preview</div>
+          <div class="results-table-wrap">
+            <table class="rank-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Team</th>
+                  <th>Auto Score</th>
+                  <th>Extra Score</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody id="rank-tbody">
+                <tr><td colspan="5" style="color:var(--muted);text-align:center;padding:1.5rem">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
+
+      <!-- Score Settings -->
+      <div class="panel">
+        <div class="panel-title">⚙️ Score Point Values</div>
+        <div class="standings-info">
+          Change how many points each prize position is worth. These are applied globally when computing auto-scores.
+          The values are saved in your browser — update them here to match your fest's scoring rules.
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem">
+          <div class="field">
+            <label>🥇 1st Prize Points</label>
+            <input type="number" id="pts-1" value="5" min="0" max="100" onchange="savePointValues();computeAndRender()">
+          </div>
+          <div class="field">
+            <label>🥈 2nd Prize Points</label>
+            <input type="number" id="pts-2" value="3" min="0" max="100" onchange="savePointValues();computeAndRender()">
+          </div>
+          <div class="field">
+            <label>🥉 3rd Prize Points</label>
+            <input type="number" id="pts-3" value="1" min="0" max="100" onchange="savePointValues();computeAndRender()">
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -337,56 +399,272 @@
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const TEAMS = { 1: 'Alpha', 2: 'Beta', 3: 'Gamma', 4: 'Delta' };
+const TEAMS = {
+  1: { name: 'Alpha', color: 'var(--t1)' },
+  2: { name: 'Beta',  color: 'var(--t2)' },
+  3: { name: 'Gamma', color: 'var(--t3)' },
+  4: { name: 'Delta', color: 'var(--t4)' },
+};
 
-// ── AUTH ────────────────────────────────────────────────────────────────
+let allResults = [];
+let teamExtraScores = { 1: 0, 2: 0, 3: 0, 4: 0 };
+
+// ── AUTH ─────────────────────────────────────────────────────────────────
 function doLogin() {
   const pw = document.getElementById('login-pw').value;
   if (pw === ADMIN_PASSWORD) {
     sessionStorage.setItem('fhz_admin', '1');
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-ui').style.display = 'block';
-    loadResults();
+    init();
   } else {
     document.getElementById('login-err').textContent = 'Incorrect password.';
   }
 }
-
-function logout() {
-  sessionStorage.removeItem('fhz_admin');
-  location.reload();
-}
+function logout() { sessionStorage.removeItem('fhz_admin'); location.reload(); }
 
 if (sessionStorage.getItem('fhz_admin')) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-ui').style.display = 'block';
 }
 
-// ── FORM ────────────────────────────────────────────────────────────────
+// ── TABS ─────────────────────────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'standings') computeAndRender();
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────
+async function init() {
+  loadPointValues();
+  loadExtraScores();
+  await loadResults();
+  setupRealtime();
+}
+
+// ── POINT VALUES (localStorage) ──────────────────────────────────────────
+function savePointValues() {
+  localStorage.setItem('fhz_pts', JSON.stringify({
+    p1: parseInt(document.getElementById('pts-1').value) || 5,
+    p2: parseInt(document.getElementById('pts-2').value) || 3,
+    p3: parseInt(document.getElementById('pts-3').value) || 1,
+  }));
+}
+function loadPointValues() {
+  const saved = JSON.parse(localStorage.getItem('fhz_pts') || '{}');
+  if (saved.p1 !== undefined) document.getElementById('pts-1').value = saved.p1;
+  if (saved.p2 !== undefined) document.getElementById('pts-2').value = saved.p2;
+  if (saved.p3 !== undefined) document.getElementById('pts-3').value = saved.p3;
+}
+function getPoints() {
+  return {
+    p1: parseInt(document.getElementById('pts-1').value) || 5,
+    p2: parseInt(document.getElementById('pts-2').value) || 3,
+    p3: parseInt(document.getElementById('pts-3').value) || 1,
+  };
+}
+
+// ── EXTRA SCORES (Supabase team_scores table with upsert) ────────────────
+// We store extra scores in a simple key-value style using a `team_scores` table.
+// If the table doesn't exist we fall back to localStorage gracefully.
+async function loadExtraScores() {
+  try {
+    const { data, error } = await sb.from('team_scores').select('*');
+    if (error) throw error;
+    if (data && data.length) {
+      data.forEach(row => {
+        teamExtraScores[row.team_id] = row.extra_score || 0;
+      });
+    }
+  } catch {
+    // Fallback: localStorage
+    const saved = JSON.parse(localStorage.getItem('fhz_extra_scores') || '{}');
+    Object.assign(teamExtraScores, saved);
+  }
+}
+
+async function saveExtraScore(teamId, value) {
+  const numVal = parseInt(value) || 0;
+  teamExtraScores[teamId] = numVal;
+
+  // Save to localStorage as fallback
+  localStorage.setItem('fhz_extra_scores', JSON.stringify(teamExtraScores));
+
+  // Try Supabase upsert
+  try {
+    const { error } = await sb.from('team_scores').upsert(
+      { team_id: teamId, extra_score: numVal, team_name: TEAMS[teamId].name },
+      { onConflict: 'team_id' }
+    );
+    if (error) throw error;
+  } catch {
+    // Silently use localStorage only — table may not exist yet
+  }
+
+  computeAndRender();
+}
+
+// ── RESULTS CRUD ──────────────────────────────────────────────────────────
+async function loadResults() {
+  const { data } = await sb.from('results').select('*').order('created_at', { ascending: false });
+  allResults = data || [];
+  renderResultsTable();
+  computeAndRender();
+}
+
+function renderResultsTable() {
+  const tbody = document.getElementById('results-tbody');
+  if (!allResults.length) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="6">No results yet. Add one!</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = allResults.map(r => `
+    <tr>
+      <td><strong>${r.emoji || '🎭'} ${r.programme_name}</strong></td>
+      <td>${r.category ? `<span class="prog-badge">${r.category}</span>` : '—'}</td>
+      <td>${r.first_name ? `<span class="tag tag-gold">${r.first_name}</span><br><small style="color:var(--muted)">${TEAMS[r.first_team_id]?.name||''}${r.first_grade?' · '+r.first_grade:''}</small>` : '—'}</td>
+      <td>${r.second_name ? `<span class="tag tag-silver">${r.second_name}</span><br><small style="color:var(--muted)">${TEAMS[r.second_team_id]?.name||''}${r.second_grade?' · '+r.second_grade:''}</small>` : '—'}</td>
+      <td>${r.third_name ? `<span class="tag tag-bronze">${r.third_name}</span><br><small style="color:var(--muted)">${TEAMS[r.third_team_id]?.name||''}${r.third_grade?' · '+r.third_grade:''}</small>` : '—'}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn secondary sm" onclick="editResult('${r.id}')">Edit</button>
+          <button class="btn danger sm" onclick="deleteResult('${r.id}')">Del</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+// ── COMPUTE SCORES ───────────────────────────────────────────────────────
+function computeAutoScores() {
+  const pts = getPoints();
+  const scores = { 1: 0, 2: 0, 3: 0, 4: 0 };
+  allResults.forEach(r => {
+    if (r.first_team_id  && scores[r.first_team_id]  !== undefined) scores[r.first_team_id]  += pts.p1;
+    if (r.second_team_id && scores[r.second_team_id] !== undefined) scores[r.second_team_id] += pts.p2;
+    if (r.third_team_id  && scores[r.third_team_id]  !== undefined) scores[r.third_team_id]  += pts.p3;
+  });
+  return scores;
+}
+
+function computeAndRender() {
+  const auto = computeAutoScores();
+  const pts = getPoints();
+
+  // Count prizes per team
+  const prizeCounts = {};
+  [1,2,3,4].forEach(id => prizeCounts[id] = {p1:0,p2:0,p3:0});
+  allResults.forEach(r => {
+    if (r.first_team_id  && prizeCounts[r.first_team_id])  prizeCounts[r.first_team_id].p1++;
+    if (r.second_team_id && prizeCounts[r.second_team_id]) prizeCounts[r.second_team_id].p2++;
+    if (r.third_team_id  && prizeCounts[r.third_team_id])  prizeCounts[r.third_team_id].p3++;
+  });
+
+  // Render team cards
+  const grid = document.getElementById('teams-grid');
+  grid.innerHTML = [1,2,3,4].map(id => {
+    const extra = teamExtraScores[id] || 0;
+    const total = auto[id] + extra;
+    const pc = prizeCounts[id];
+    return `
+      <div class="team-card" data-team="${id}">
+        <div class="team-card-header">
+          <div class="team-name">Team ${TEAMS[id].name}</div>
+          <div class="team-id-badge">ID ${id}</div>
+        </div>
+        <div class="team-score-row">
+          <div class="team-score-display" data-team="${id}">${total}</div>
+          <div class="score-breakdown">
+            Auto: <strong>${auto[id]}</strong> pts<br>
+            Extra: <strong>${extra}</strong> pts<br>
+            🥇×${pc.p1} 🥈×${pc.p2} 🥉×${pc.p3}
+          </div>
+        </div>
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">
+          (${pts.p1}pts/1st · ${pts.p2}pts/2nd · ${pts.p3}pts/3rd)
+        </div>
+        <div class="team-edit-row">
+          <input type="number" id="extra-${id}" value="${extra}" placeholder="Extra pts" min="-999" max="9999"
+            onkeydown="if(event.key==='Enter')saveTeamExtra(${id})">
+          <button class="team-save-btn" id="save-btn-${id}" onclick="saveTeamExtra(${id})">Save</button>
+        </div>
+        <div style="font-size:.7rem;color:var(--muted);margin-top:.4rem">Enter extra/bonus points and hit Save</div>
+      </div>`;
+  }).join('');
+
+  // Render rank table
+  const ranked = [1,2,3,4].map(id => ({
+    id,
+    name: TEAMS[id].name,
+    auto: auto[id],
+    extra: teamExtraScores[id] || 0,
+    total: auto[id] + (teamExtraScores[id] || 0),
+  })).sort((a,b) => b.total - a.total);
+
+  const rankTbody = document.getElementById('rank-tbody');
+  rankTbody.innerHTML = ranked.map((t, i) => {
+    const rankClass = i===0 ? 'rank-1' : i===1 ? 'rank-2' : i===2 ? 'rank-3' : '';
+    const medal = i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : `#${i+1}`;
+    return `
+      <tr>
+        <td><span class="rank-num ${rankClass}">${medal}</span></td>
+        <td><strong style="color:${TEAMS[t.id].color}">Team ${t.name}</strong></td>
+        <td style="font-family:'DM Mono',monospace">${t.auto}</td>
+        <td style="font-family:'DM Mono',monospace;color:${t.extra>=0?'var(--green)':'var(--red)'}">${t.extra >= 0 ? '+' : ''}${t.extra}</td>
+        <td style="font-family:'DM Mono',monospace;font-weight:700;font-size:1rem">${t.total}</td>
+      </tr>`;
+  }).join('');
+}
+
+async function saveTeamExtra(teamId) {
+  const input = document.getElementById(`extra-${teamId}`);
+  const btn = document.getElementById(`save-btn-${teamId}`);
+  const val = parseInt(input.value) || 0;
+
+  btn.textContent = 'Saving...';
+  btn.classList.add('saving');
+  await saveExtraScore(teamId, val);
+  btn.textContent = 'Saved ✓';
+  setTimeout(() => { btn.textContent = 'Save'; btn.classList.remove('saving'); }, 1500);
+
+  showStandingsMsg(`Team ${TEAMS[teamId].name} extra score updated to ${val >= 0 ? '+' : ''}${val}`, 'success');
+}
+
+function showStandingsMsg(text, type) {
+  const el = document.getElementById('standings-msg');
+  el.textContent = text; el.className = 'msg-bar ' + type;
+  setTimeout(() => { el.className = 'msg-bar'; }, 3500);
+}
+
+// ── FORM ─────────────────────────────────────────────────────────────────
 function getFormData() {
   return {
     programme_name: document.getElementById('f-prog').value.trim(),
     category: document.getElementById('f-cat').value.trim(),
-    emoji: document.getElementById('f-emoji').value.trim(),
-    banner_url: document.getElementById('f-banner').value.trim(),
-    first_name: document.getElementById('f-1-name').value.trim(),
+    emoji: document.getElementById('f-emoji').value.trim() || '🎭',
+    banner_url: document.getElementById('f-banner').value.trim() || null,
+    first_name: document.getElementById('f-1-name').value.trim() || null,
     first_team_id: parseInt(document.getElementById('f-1-team').value) || null,
-    first_grade: document.getElementById('f-1-grade').value,
-    first_chest_numbers: document.getElementById('f-1-chests').value.trim(),
-    second_name: document.getElementById('f-2-name').value.trim(),
+    first_grade: document.getElementById('f-1-grade').value || null,
+    first_chest_numbers: document.getElementById('f-1-chests').value.trim() || null,
+    second_name: document.getElementById('f-2-name').value.trim() || null,
     second_team_id: parseInt(document.getElementById('f-2-team').value) || null,
-    second_grade: document.getElementById('f-2-grade').value,
-    second_chest_numbers: document.getElementById('f-2-chests').value.trim(),
-    third_name: document.getElementById('f-3-name').value.trim(),
+    second_grade: document.getElementById('f-2-grade').value || null,
+    second_chest_numbers: document.getElementById('f-2-chests').value.trim() || null,
+    third_name: document.getElementById('f-3-name').value.trim() || null,
     third_team_id: parseInt(document.getElementById('f-3-team').value) || null,
-    third_grade: document.getElementById('f-3-grade').value,
-    third_chest_numbers: document.getElementById('f-3-chests').value.trim(),
+    third_grade: document.getElementById('f-3-grade').value || null,
+    third_chest_numbers: document.getElementById('f-3-chests').value.trim() || null,
   };
 }
 
 function clearForm() {
-  ['f-prog','f-cat','f-emoji','f-banner','f-1-name','f-1-chests','f-2-name','f-2-chests','f-3-name','f-3-chests'].forEach(id => document.getElementById(id).value = '');
-  ['f-1-team','f-1-grade','f-2-team','f-2-grade','f-3-team','f-3-grade'].forEach(id => document.getElementById(id).selectedIndex = 0);
+  ['f-prog','f-cat','f-emoji','f-banner','f-1-name','f-1-chests','f-2-name','f-2-chests','f-3-name','f-3-chests']
+    .forEach(id => document.getElementById(id).value = '');
+  ['f-1-team','f-1-grade','f-2-team','f-2-grade','f-3-team','f-3-grade']
+    .forEach(id => document.getElementById(id).selectedIndex = 0);
   document.getElementById('editing-id').value = '';
   document.getElementById('form-title').textContent = '✦ Add Programme Result';
   document.getElementById('submit-btn').textContent = 'Submit Result';
@@ -402,75 +680,49 @@ function showMsg(text, type) {
 async function submitResult() {
   const data = getFormData();
   if (!data.programme_name) { showMsg('Programme name is required.', 'error'); return; }
-
   const btn = document.getElementById('submit-btn');
   btn.innerHTML = '<span class="spinner"></span>Saving...';
   btn.disabled = true;
-
   const editingId = document.getElementById('editing-id').value;
   let error;
-
   if (editingId) {
     ({ error } = await sb.from('results').update(data).eq('id', editingId));
   } else {
     ({ error } = await sb.from('results').insert(data));
   }
-
   btn.disabled = false;
   btn.textContent = editingId ? 'Update Result' : 'Submit Result';
-
   if (error) { showMsg('Error: ' + error.message, 'error'); return; }
-  showMsg(editingId ? 'Result updated!' : 'Result added successfully!', 'success');
+  showMsg(editingId ? 'Result updated!' : 'Result added!', 'success');
   clearForm();
   loadResults();
 }
 
-// ── TABLE ────────────────────────────────────────────────────────────────
-async function loadResults() {
-  const { data } = await sb.from('results').select('*').order('created_at', { ascending: false });
-  const tbody = document.getElementById('results-tbody');
-  if (!data?.length) {
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="6">No results yet. Add one!</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = data.map(r => `
-    <tr>
-      <td><strong>${r.programme_name}</strong></td>
-      <td><span class="prog-badge">${r.category || '—'}</span></td>
-      <td>${r.first_name ? `<span class="tag tag-gold">${r.first_name}</span><br><small style="color:var(--muted)">${TEAMS[r.first_team_id] || ''}${r.first_grade ? ' · '+r.first_grade : ''}</small>` : '—'}</td>
-      <td>${r.second_name ? `<span class="tag tag-silver">${r.second_name}</span><br><small style="color:var(--muted)">${TEAMS[r.second_team_id] || ''}${r.second_grade ? ' · '+r.second_grade : ''}</small>` : '—'}</td>
-      <td>${r.third_name ? `<span class="tag tag-bronze">${r.third_name}</span><br><small style="color:var(--muted)">${TEAMS[r.third_team_id] || ''}${r.third_grade ? ' · '+r.third_grade : ''}</small>` : '—'}</td>
-      <td>
-        <div class="action-btns">
-          <button class="btn secondary sm" onclick="editResult('${r.id}')">Edit</button>
-          <button class="btn danger sm" onclick="deleteResult('${r.id}')">Del</button>
-        </div>
-      </td>
-    </tr>`).join('');
-}
-
 async function editResult(id) {
-  const { data } = await sb.from('results').select('*').eq('id', id).single();
-  if (!data) return;
-  document.getElementById('f-prog').value = data.programme_name || '';
-  document.getElementById('f-cat').value = data.category || '';
-  document.getElementById('f-emoji').value = data.emoji || '';
-  document.getElementById('f-banner').value = data.banner_url || '';
-  document.getElementById('f-1-name').value = data.first_name || '';
-  document.getElementById('f-1-team').value = data.first_team_id || '';
-  document.getElementById('f-1-grade').value = data.first_grade || '';
-  document.getElementById('f-1-chests').value = data.first_chest_numbers || '';
-  document.getElementById('f-2-name').value = data.second_name || '';
-  document.getElementById('f-2-team').value = data.second_team_id || '';
-  document.getElementById('f-2-grade').value = data.second_grade || '';
-  document.getElementById('f-2-chests').value = data.second_chest_numbers || '';
-  document.getElementById('f-3-name').value = data.third_name || '';
-  document.getElementById('f-3-team').value = data.third_team_id || '';
-  document.getElementById('f-3-grade').value = data.third_grade || '';
-  document.getElementById('f-3-chests').value = data.third_chest_numbers || '';
+  const r = allResults.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('f-prog').value = r.programme_name || '';
+  document.getElementById('f-cat').value = r.category || '';
+  document.getElementById('f-emoji').value = r.emoji || '';
+  document.getElementById('f-banner').value = r.banner_url || '';
+  document.getElementById('f-1-name').value = r.first_name || '';
+  document.getElementById('f-1-team').value = r.first_team_id || '';
+  document.getElementById('f-1-grade').value = r.first_grade || '';
+  document.getElementById('f-1-chests').value = r.first_chest_numbers || '';
+  document.getElementById('f-2-name').value = r.second_name || '';
+  document.getElementById('f-2-team').value = r.second_team_id || '';
+  document.getElementById('f-2-grade').value = r.second_grade || '';
+  document.getElementById('f-2-chests').value = r.second_chest_numbers || '';
+  document.getElementById('f-3-name').value = r.third_name || '';
+  document.getElementById('f-3-team').value = r.third_team_id || '';
+  document.getElementById('f-3-grade').value = r.third_grade || '';
+  document.getElementById('f-3-chests').value = r.third_chest_numbers || '';
   document.getElementById('editing-id').value = id;
   document.getElementById('form-title').textContent = '✏️ Edit Result';
   document.getElementById('submit-btn').textContent = 'Update Result';
+  // Switch to results tab if not there
+  const tabBtn = document.querySelector('.tab-btn');
+  switchTab('results', tabBtn);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -480,10 +732,15 @@ async function deleteResult(id) {
   loadResults();
 }
 
-// Realtime refresh
-if (sessionStorage.getItem('fhz_admin')) {
-  sb.channel('admin-results').on('postgres_changes', { event: '*', schema: 'public', table: 'results' }, loadResults).subscribe();
+// ── REALTIME ─────────────────────────────────────────────────────────────
+function setupRealtime() {
+  sb.channel('admin-live')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'results' }, loadResults)
+    .subscribe();
 }
+
+// ── BOOT ─────────────────────────────────────────────────────────────────
+if (sessionStorage.getItem('fhz_admin')) init();
 </script>
 </body>
 </html>
